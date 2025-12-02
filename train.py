@@ -18,7 +18,7 @@ LEARNING_RATE = 2.5e-4
 NUM_ENVS = 4                 
 NUM_AGENTS = 64              
 NUM_STEPS = 128              
-VISUALIZE_EVERY = 3  # Visualize every ~100k steps (3 * 32768)
+VISUALIZE_EVERY = 8  # Visualize every ~100k steps (3 * 32768)
 
 # --- FIX: Use PettingZoo Wrapper ---
 def make_env(*args, **kwargs):
