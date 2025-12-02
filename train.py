@@ -18,13 +18,13 @@ LEARNING_RATE = 2.5e-4
 NUM_ENVS = 4                 
 NUM_AGENTS = 64              
 NUM_STEPS = 128              
-VISUALIZE_EVERY = 50         
+VISUALIZE_EVERY = 3  # Visualize every ~100k steps (3 * 32768)
 
 # --- FIX: Use PettingZoo Wrapper ---
 def make_env(*args, **kwargs):
     env = BlindSwarm(num_agents=NUM_AGENTS, grid_size=32)
     # This wrapper handles the conversion from Dictionary -> Batch for us
-    return pufferlib.emulation.PettingZooPufferEnv(env=env)
+    return pufferlib.emulation.PettingZooPufferEnv(env=env, **kwargs)
 
 def watch_evolution(agent, device):
     print("\n🍿 Watching evolution...")
@@ -33,6 +33,7 @@ def watch_evolution(agent, device):
     # PettingZoo reset returns (obs, info)
     obs_dict, _ = env.reset()
     
+    total_reward = 0
     for _ in range(200):
         # Convert Dict -> List -> Tensor
         obs_list = [obs_dict[agent] for agent in env.agents]
@@ -45,12 +46,14 @@ def watch_evolution(agent, device):
         actions_np = actions.cpu().numpy()
         action_dict = {agent: actions_np[i] for i, agent in enumerate(env.agents)}
         
-        obs_dict, _, _, _, _ = env.step(action_dict)
+        obs_dict, rewards, _, _, _ = env.step(action_dict)
+        total_reward += sum(rewards.values())
         
         import pygame
         pygame.time.wait(30)
         
     env.close()
+    print(f"✅ Evolution finished. Total Reward: {total_reward:.2f}")
     print("✅ Resuming training...\n")
 
 def train():
@@ -154,7 +157,7 @@ def train():
                 loss.backward()
                 optimizer.step()
 
-        print(f"Step {global_step} | Avg Reward: {rewards.mean().item():.4f}")
+        print(f"Step {global_step} | Avg Reward: {rewards.mean().item():.4f} | Min: {rewards.min().item():.4f} | Max: {rewards.max().item():.4f}")
 
     vec_env.close()
 

@@ -130,8 +130,20 @@ class BlindSwarm(ParallelEnv):
             observations[agent] = obs_array[i]
             rewards[agent] = rewards_arr[i]
             terminations[agent] = False
-            truncations[agent] = truncated
+            truncations[agent] = truncateds[agent] if 'truncateds' in locals() else truncated 
             infos[agent] = {}
+
+        for i, agent in enumerate(self.agents):
+            observations[agent] = obs_array[i]
+            rewards[agent] = rewards_arr[i]
+            terminations[agent] = False
+            truncations[agent] = truncateds[agent] if 'truncateds' in locals() else truncated 
+            infos[agent] = {}
+
+        if self.render_mode == "human":
+            self.render()
+            
+        return observations, rewards, terminations, truncations, infos
 
         if self.render_mode == "human":
             self.render()
